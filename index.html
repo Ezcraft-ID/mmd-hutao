@@ -21,6 +21,23 @@
     <canvas id="renderCanvas"></canvas>
     <div id="loading">Loading Model...</div>
 
+    <!-- Diagnostic: try to import a known bare specifier so failures show clearly -->
+    <script type="module">
+    (async function(){
+        try {
+            // This dynamic import will only succeed if the import map is applied correctly
+            await import('@babylonjs/core');
+            console.log('✅ Import map and modules look available');
+        } catch (err) {
+            console.error('❌ Import map / module import failed:', err);
+            const ld = document.getElementById('loading');
+            if (ld) {
+                ld.textContent = 'Import error — buka DevTools (Console) untuk melihat detail.';
+            }
+        }
+    })();
+    </script>
+
     <script type="module" src="assets/js/main.js"></script>
 </body>
 </html>

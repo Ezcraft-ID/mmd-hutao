@@ -12,6 +12,7 @@ html, body {
     height: 100%;
     touch-action: none;
     display: block;
+    /* Hapus image-rendering jika ada yang membuat blur */
 }
 
 #loading {
