@@ -1,21 +1,18 @@
 // ============================================================
-// Import - Perbaikan untuk browser ESM
+// Import - Menggunakan Import Map
 // ============================================================
 
-import * as BABYLON from 'https://esm.sh/@babylonjs/core@7.10.0';
-import * as BabylonMMD from 'https://esm.sh/babylon-mmd@0.50.0?deps=@babylonjs/core@7.10.0';
+import * as BABYLON from '@babylonjs/core';
+import * as BabylonMMD from 'babylon-mmd';
 
-const { 
-    SdefInjector, 
-    MmdRuntime,
-    PmxLoader
-} = BabylonMMD;
+console.log('📦 BABYLON loaded:', typeof BABYLON);
+console.log('📦 BabylonMMD loaded:', typeof BabylonMMD);
+console.log('📦 BabylonMMD exports:', Object.keys(BabylonMMD));
 
-// SceneLoader sudah ada di dalam BABYLON
-const { SceneLoader } = BABYLON;
+const { SdefInjector } = BabylonMMD;
 
-console.log('📦 babylon-mmd loaded successfully');
-console.log('📦 PmxLoader:', PmxLoader);
+// Cari loader yang tersedia
+const PmxLoader = BabylonMMD.PmxLoader || BabylonMMD.default?.PmxLoader;
 
 // ============================================================
 // Setup
@@ -24,6 +21,10 @@ console.log('📦 PmxLoader:', PmxLoader);
 const canvas = document.getElementById('renderCanvas');
 const loadingDiv = document.getElementById('loading');
 
+if (!canvas) {
+    console.error('❌ Canvas not found!');
+}
+
 const engine = new BABYLON.Engine(canvas, true, {
     preserveDrawingBuffer: true,
     stencil: true,
@@ -31,16 +32,18 @@ const engine = new BABYLON.Engine(canvas, true, {
 });
 
 // Apply SDEF
-SdefInjector.OverrideEngineCreateEffect(engine);
-console.log('✅ SDEF Injector applied');
+if (SdefInjector) {
+    SdefInjector.OverrideEngineCreateEffect(engine);
+    console.log('✅ SDEF Injector applied');
+}
 
-// ============================================================
-// Register PMX Loader Plugin
-// ============================================================
-
-// Daftarkan PMX loader ke SceneLoader
-SceneLoader.RegisterPlugin(new PmxLoader());
-console.log('✅ PMX Loader registered');
+// Register PMX Loader
+if (PmxLoader) {
+    BABYLON.SceneLoader.RegisterPlugin(new PmxLoader());
+    console.log('✅ PMX Loader registered');
+} else {
+    console.warn('⚠️ PmxLoader not found, trying alternative...');
+}
 
 // ============================================================
 // Create Scene
@@ -94,15 +97,13 @@ const createScene = async function () {
     ground.material = groundMaterial;
 
     // ========== LOAD MMD MODEL ==========
-    
     const modelPath = "assets/model/";
     const modelFile = "model.pmx";
 
     try {
         updateLoading("Loading MMD Model...");
 
-        // Load menggunakan SceneLoader.ImportMeshAsync
-        const result = await SceneLoader.ImportMeshAsync(
+        const result = await BABYLON.SceneLoader.ImportMeshAsync(
             "",
             modelPath,
             modelFile,
@@ -118,22 +119,18 @@ const createScene = async function () {
         console.log("✅ Model loaded successfully!");
         console.log("📊 Loaded meshes:", result.meshes.length);
 
-        // Dapatkan mesh utama
         const mmdMesh = result.meshes[0];
         
         if (mmdMesh) {
             mmdMesh.position.y = 0;
-            
             console.log("📊 Mesh info:");
             console.log("   Name:", mmdMesh.name);
-            console.log("   Children:", mmdMesh.getChildMeshes().length);
         }
 
         hideLoading();
 
     } catch (error) {
         console.error("❌ Error loading model:", error);
-        console.error("Stack:", error.stack);
         updateLoading(`Error: ${error.message}`);
     }
 

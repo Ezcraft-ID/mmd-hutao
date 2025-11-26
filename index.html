@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BabylonJS MMD Viewer</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Import Map untuk resolve module -->
+    <script type="importmap">
+    {
+        "imports": {
+            "@babylonjs/core": "https://cdn.jsdelivr.net/npm/@babylonjs/core@7.10.0/+esm",
+            "@babylonjs/core/": "https://cdn.jsdelivr.net/npm/@babylonjs/core@7.10.0/",
+            "babylon-mmd": "https://cdn.jsdelivr.net/npm/babylon-mmd@0.50.0/+esm"
+        }
+    }
+    </script>
 </head>
 <body>
     <canvas id="renderCanvas"></canvas>
